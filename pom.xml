@@ -34,62 +34,101 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<!-- 在Parent Module的pom.xml中忽略 -->
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.thrift.tools</groupId>
+										<artifactId>maven-thrift-plugin</artifactId>
+										<!-- 这个范围是指，版本大于0.1.11的都忽略 -->
+										<versionRange>[0.1.11,)</versionRange>
+										<goals>
+											<!-- 这里的goal就是在原来child module中plugin定义的goal -->
+											<goal>compile</goal>
+											<goal>testCompile</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<!-- 记住这个ignore元素 -->
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+
+				<!-- thrift 文件自动生成的插件 -->
+				<plugin>
+					<groupId>org.apache.thrift.tools</groupId>
+					<artifactId>maven-thrift-plugin</artifactId>
+					<version>0.1.11</version>
+					<configuration>
+						<thriftExecutable>/usr/bin/thrift</thriftExecutable>
+						<generator>java</generator>
+						<outputDirectory>src/main/gen-java</outputDirectory>
+					</configuration>
+					<executions>
+						<execution>
+							<id>thrift-sources</id>
+							<phase>generate-sources</phase>
+							<goals>
+								<goal>compile</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>thrift-test-sources</id>
+							<phase>generate-test-sources</phase>
+							<goals>
+								<goal>testCompile</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.7</version>
+					<executions>
+						<execution>
+							<id>add-source</id>
+							<phase>generate-sources</phase>
+							<goals>
+								<goal>add-source</goal>
+							</goals>
+							<configuration>
+								<sources>
+									<!-- 我们可以通过在这里添加多个source节点，来添加任意多个源文件夹 -->
+									<source>${basedir}/src/main/java-gen</source>
+								</sources>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
-			<!-- thrift 文件自动生成的插件 -->
 			<plugin>
 				<groupId>org.apache.thrift.tools</groupId>
 				<artifactId>maven-thrift-plugin</artifactId>
-				<version>0.1.11</version>
-				<configuration>
-					<thriftExecutable>/usr/bin/thrift</thriftExecutable>
-					<generator>java</generator>
-					<outputDirectory>src/main/gen-java</outputDirectory>
-				</configuration>
-				<executions>
-					<execution>
-						<id>thrift-sources</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>thrift-test-sources</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.7</version>
-				<executions>
-					<execution>
-						<id>add-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<!-- 我们可以通过在这里添加多个source节点，来添加任意多个源文件夹 -->
-								<source>${basedir}/src/main/java-gen</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
 		</plugins>
+
 	</build>
 </project>
